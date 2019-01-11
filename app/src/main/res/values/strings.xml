@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">BeaconAndroid</string>
+    <string name="advertise">Advertise</string>
+    <string name="find">Find</string>
+    <string name="beacon_type">Beacon type</string>
+    <string name="stop">Stop</string>
+    <string name="empty_beacon_type">Beacon type field can\'t be empty.</string>
+</resources>
