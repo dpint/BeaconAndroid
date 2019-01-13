@@ -11,6 +11,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.io.IOException;
+
+import dpint.si.beaconandroid.Probe;
+
 public class FindFragment extends Fragment{
 
     interface ProbeListener{
@@ -44,6 +48,12 @@ public class FindFragment extends Fragment{
                 }else if(findButton.getText().toString().equals(getString(R.string.find))){
                     findButton.setText(R.string.stop);
                     beaconTypeEditText.setEnabled(false);
+
+                    try {
+                        Probe p = new Probe(getActivity(), beaconType);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }else{
                     findButton.setText(R.string.find);
                     beaconTypeEditText.setEnabled(true);
