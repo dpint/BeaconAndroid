@@ -30,7 +30,6 @@ public class Beacon {
     private int port;
     private AtomicBoolean isClosed;
 
-    private final DatagramChannel channel;
     private final DatagramSocket socket;
 
     private ProbeReceiver probeReceiver;
@@ -39,8 +38,7 @@ public class Beacon {
         this.beaconType = beaconType;
         this.port = port;
 
-        channel = DatagramChannel.open();
-        socket = channel.socket();
+        socket = new DatagramSocket(null);
         socket.setReuseAddress(true);
         socket.setBroadcast(true);
         socket.bind(new InetSocketAddress(DISCOVERY_PORT));

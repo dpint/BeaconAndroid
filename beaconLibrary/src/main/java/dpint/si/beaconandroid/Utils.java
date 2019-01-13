@@ -44,15 +44,14 @@ public class Utils {
     @Nullable
     static InetAddress getBroadcastIpAddress(){
         InetAddress broadcastAddress = null;
-        Enumeration<NetworkInterface> interfaces = null;
+        Enumeration<NetworkInterface> interfaces;
 
         try {
             interfaces = NetworkInterface.getNetworkInterfaces();
         } catch (SocketException e) {
-            e.printStackTrace();
+            return null;
         }
 
-        assert interfaces != null;
         while (interfaces.hasMoreElements()) {
             NetworkInterface networkInterface = interfaces.nextElement();
 
@@ -64,9 +63,7 @@ public class Utils {
                         }
                     }
                 }
-            } catch (SocketException e) {
-                e.printStackTrace();
-            }
+            } catch (SocketException ignored){}
         }
 
         return broadcastAddress;

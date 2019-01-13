@@ -16,12 +16,13 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Probe {
+    private final static int PROBE_INTERVAL = 2000;
+
     private int beaconTimeout;
     private String beaconType;
 
     private AtomicBoolean isClosed;
 
-    private final DatagramChannel channel;
     private final DatagramSocket socket;
 
     private ProbeBroadcaster probeBroadcaster;
@@ -34,11 +35,10 @@ public class Probe {
         this.beaconTimeout = beaconTimeout;
         this.beaconType = beaconType;
 
-        channel = DatagramChannel.open();
-        socket = channel.socket();
+        socket = new DatagramSocket(null);
         socket.setReuseAddress(true);
         socket.setBroadcast(true);
-        socket.bind(new InetSocketAddress(Beacon.DISCOVERY_PORT));
+        socket.bind(new InetSocketAddress(0));
 
         isClosed = new AtomicBoolean(false);
 
@@ -57,17 +57,18 @@ public class Probe {
         public void run() {
             byte[] message = Beacon.encode(beaconType);
             DatagramPacket packet = new DatagramPacket(message, message.length,
-                    Utils.getBroadcastIpAddress(), socket.getLocalPort());
+                    Utils.getBroadcastIpAddress(), Beacon.DISCOVERY_PORT);
 
             while(true){
                 try {
                     socket.send(packet);
-                    Thread.sleep(2000);
+                    Thread.sleep(PROBE_INTERVAL);
                 } catch (IOException|InterruptedException e) {
                     if(!socket.isClosed()){
                         socket.close();
                     }
                     isClosed.set(true);
+                    break;
                 }
             }
         }
