@@ -1,16 +1,22 @@
 package dpint.si.beaconandroid;
 
 import android.content.Context;
+import android.provider.ContactsContract;
+import android.util.Log;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.nio.channels.DatagramChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
@@ -24,16 +30,20 @@ public class Beacon {
     private int port;
     private AtomicBoolean isClosed;
 
+    private final DatagramChannel channel;
     private final DatagramSocket socket;
+
     private ProbeReceiver probeReceiver;
 
     public Beacon(Context context, String beaconType, int port) throws IOException{
         this.beaconType = beaconType;
         this.port = port;
 
-        socket = new DatagramSocket(DISCOVERY_PORT);
+        channel = DatagramChannel.open();
+        socket = channel.socket();
         socket.setReuseAddress(true);
         socket.setBroadcast(true);
+        socket.bind(new InetSocketAddress(DISCOVERY_PORT));
 
         isClosed = new AtomicBoolean(false);
 
@@ -53,9 +63,9 @@ public class Beacon {
         public void run() {
             while(true){
                 DatagramPacket recv = new DatagramPacket(buffer, buffer.length);
-
                 try {
                     socket.receive(recv);
+//                    Log.d("message", decode(recv.getData()));
                 } catch (IOException e) {
                     if(!socket.isClosed()){
                         socket.close();

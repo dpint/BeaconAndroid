@@ -2,14 +2,20 @@ package dpint.si.beaconandroid;
 
 import android.content.Context;
 import android.net.wifi.WifiManager;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
+import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
 
 public class Utils {
 
@@ -36,14 +42,33 @@ public class Utils {
     }
 
     @Nullable
-    static InetAddress getBroadcastIpAddress(InetAddress address){
-        NetworkInterface networkInterface;
+    static InetAddress getBroadcastIpAddress(){
+        InetAddress broadcastAddress = null;
+        Enumeration<NetworkInterface> interfaces = null;
+
         try {
-            networkInterface = NetworkInterface.getByInetAddress(address);
+            interfaces = NetworkInterface.getNetworkInterfaces();
         } catch (SocketException e) {
-            return null;
+            e.printStackTrace();
         }
 
-        return networkInterface.getInterfaceAddresses().get(0).getBroadcast();
+        assert interfaces != null;
+        while (interfaces.hasMoreElements()) {
+            NetworkInterface networkInterface = interfaces.nextElement();
+
+            try {
+                if (!networkInterface.isLoopback()) {
+                    for (InterfaceAddress address : networkInterface.getInterfaceAddresses()) {
+                        if (address.getBroadcast() != null) {
+                            broadcastAddress = address.getBroadcast();
+                        }
+                    }
+                }
+            } catch (SocketException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return broadcastAddress;
     }
 }

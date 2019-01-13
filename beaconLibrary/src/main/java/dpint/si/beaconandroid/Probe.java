@@ -6,8 +6,13 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.Socket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.nio.channels.DatagramChannel;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Probe {
@@ -16,6 +21,7 @@ public class Probe {
 
     private AtomicBoolean isClosed;
 
+    private final DatagramChannel channel;
     private final DatagramSocket socket;
 
     private ProbeBroadcaster probeBroadcaster;
@@ -28,10 +34,11 @@ public class Probe {
         this.beaconTimeout = beaconTimeout;
         this.beaconType = beaconType;
 
-
-        socket = new DatagramSocket(Beacon.DISCOVERY_PORT);
+        channel = DatagramChannel.open();
+        socket = channel.socket();
         socket.setReuseAddress(true);
         socket.setBroadcast(true);
+        socket.bind(new InetSocketAddress(Beacon.DISCOVERY_PORT));
 
         isClosed = new AtomicBoolean(false);
 
@@ -49,7 +56,9 @@ public class Probe {
     private class ProbeBroadcaster extends Thread {
         public void run() {
             byte[] message = Beacon.encode(beaconType);
-            DatagramPacket packet = new DatagramPacket(message, message.length, Utils.getBroadcastIpAddress(socket.getInetAddress()), socket.getPort());
+            DatagramPacket packet = new DatagramPacket(message, message.length,
+                    Utils.getBroadcastIpAddress(), socket.getLocalPort());
+
             while(true){
                 try {
                     socket.send(packet);
