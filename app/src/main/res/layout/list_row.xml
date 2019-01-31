@@ -13,7 +13,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginRight="6dip"
         android:layout_marginEnd="6dip"
-        android:contentDescription="Beacon found"
+        android:contentDescription="@string/beacon_found"
         app:srcCompat="@drawable/ic_baseline_wifi_tethering_24px" />
 
     <TextView
@@ -42,7 +42,7 @@
         android:layout_toRightOf="@id/icon"
         android:layout_toEndOf="@+id/icon"
         android:gravity="center_vertical"
-        android:text="Hostname"
+        android:text="BeaconType"
         android:textSize="16sp" />
 
 </RelativeLayout>

@@ -6,4 +6,10 @@
     <string name="stop">Stop</string>
     <string name="empty_beacon_type">Beacon type field can\'t be empty.</string>
     <string name="beacon_created">New beacon is created.</string>
+    <string name="advertised_port">Advertised port</string>
+    <string name="beacon_found">Beacon found</string>
+    <string name="empty_fields">Beacon type and advertised port fields must not be empty.</string>
+    <string name="port_not_number">Advertised port must contain only numbers.</string>
+    <string name="port_invalid_number">Advertised port must be between 0 and 65535.</string>
+    <string name="beacon_creation_fail">There was an error during beacon creation.</string>
 </resources>
