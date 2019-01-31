@@ -7,12 +7,13 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.Window;
 
 import java.util.List;
 
 import dpint.si.beaconandroid.BeaconLocation;
 
-public class MainActivity extends AppCompatActivity implements BeaconService{
+public class MainActivity extends AppCompatActivity implements BeaconService {
     Fragment findFragment;
     Fragment advertiseFragment;
 
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements BeaconService{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_main);
 
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
