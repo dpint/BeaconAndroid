@@ -10,11 +10,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import java.io.IOException;
-import java.util.Random;
-
-import dpint.si.beaconandroid.Beacon;
-
 public class AdvertiseFragment extends Fragment {
 
     private Button createButton;
@@ -48,13 +43,8 @@ public class AdvertiseFragment extends Fragment {
                 }else if(port < 0 || port > 65535){
                     Toast.makeText(getActivity(), R.string.port_invalid_number, Toast.LENGTH_LONG).show();
                 }else{
-                    try {
-                        new Beacon(getContext().getApplicationContext(), beaconType, port);
-                        Toast.makeText(getActivity(), getString(R.string.beacon_created), Toast.LENGTH_LONG).show();
-                    } catch (IOException e) {
-                        Toast.makeText(getActivity(), getString(R.string.beacon_creation_fail), Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
-                    }
+                    ((MainActivity)getActivity()).startAdvertise(beaconTypeEditText.getText().toString(), port);
+                    Toast.makeText(getActivity(), getString(R.string.beacon_created), Toast.LENGTH_LONG).show();
                 }
             }
         });

@@ -7,12 +7,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.MulticastSocket;
-import java.net.Socket;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.nio.channels.DatagramChannel;
-import java.util.List;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Probe {
@@ -23,9 +18,12 @@ public class Probe {
 
     private AtomicBoolean isClosed;
 
-    private final DatagramSocket socket;
+    private DatagramSocket socket;
 
     private ProbeBroadcaster probeBroadcaster;
+    private ProbeReceiver probeReceiver;
+
+    private ProbeListener probeListener;
 
     public Probe(Context context, String beaconType) throws IOException{
         this(context, beaconType, 5000);
@@ -44,6 +42,13 @@ public class Probe {
 
         probeBroadcaster = new ProbeBroadcaster();
         probeBroadcaster.start();
+
+        probeReceiver = new ProbeReceiver();
+        probeReceiver.start();
+    }
+
+    public void registerProbeListener(ProbeListener probeListener) {
+        this.probeListener = probeListener;
     }
 
     public void close(){
@@ -72,5 +77,36 @@ public class Probe {
                 }
             }
         }
+    }
+
+    private class ProbeReceiver extends Thread {
+        byte[] buffer = new byte[256];
+
+        public void run() {
+            while(true) {
+                DatagramPacket recv = new DatagramPacket(buffer, buffer.length);
+                try {
+                    socket.receive(recv);
+                } catch (IOException e) {
+                    if (!socket.isClosed()) {
+                        socket.close();
+                    }
+                    isClosed.set(true);
+                    break;
+                }
+
+                byte[] message = Beacon.encode(beaconType);
+                if (Beacon.hasPrefix(message, recv.getData(), recv.getLength())) {
+                    InetAddress inetAddress = recv.getAddress();
+                    String data = Beacon.decode(recv.getData());
+
+                    newBeacon(new BeaconLocation(inetAddress, data, new Date()));
+                }
+            }
+        }
+    }
+
+    private void newBeacon(BeaconLocation newBeacon) {
+        probeListener.onBeaconFound(newBeacon);
     }
 }

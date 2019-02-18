@@ -1,6 +1,7 @@
 package dpint.si.app;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
@@ -9,13 +10,23 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.Window;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
+import dpint.si.beaconandroid.Beacon;
 import dpint.si.beaconandroid.BeaconLocation;
+import dpint.si.beaconandroid.Probe;
+import dpint.si.beaconandroid.ProbeListener;
 
-public class MainActivity extends AppCompatActivity implements BeaconService {
+public class MainActivity extends AppCompatActivity implements BeaconService, ProbeListener {
     Fragment findFragment;
     Fragment advertiseFragment;
+
+    public static List<BeaconLocation> currentBeacons = new ArrayList<>();
+    private List<Probe> runningAdvertisements = new ArrayList<>();
+
+    private Handler mHandler;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -46,6 +57,8 @@ public class MainActivity extends AppCompatActivity implements BeaconService {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_main);
 
+        mHandler = new Handler();
+
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
         BottomNavigationView navigation = findViewById(R.id.navigation);
@@ -61,7 +74,13 @@ public class MainActivity extends AppCompatActivity implements BeaconService {
 
     @Override
     public void startProbe(String beaconType) {
-
+        try {
+            Probe p = new Probe(MainActivity.this.getApplicationContext(), beaconType);
+            runningAdvertisements.add(p);
+            registerListener(p);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -76,12 +95,16 @@ public class MainActivity extends AppCompatActivity implements BeaconService {
 
     @Override
     public List<BeaconLocation> getBeacons() {
-        return null;
+        return currentBeacons;
     }
 
     @Override
-    public void startAdvertise(String beaconType) {
-
+    public void startAdvertise(String beaconType, int port) {
+        try {
+            new Beacon(MainActivity.this.getApplicationContext(), beaconType, port);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -90,7 +113,27 @@ public class MainActivity extends AppCompatActivity implements BeaconService {
     }
 
     @Override
-    public List<String> getRunningAdvertisements() {
-        return null;
+    public List<Probe> getRunningAdvertisements() {
+        return runningAdvertisements;
+    }
+
+    private void registerListener(Probe p) {
+        p.registerProbeListener(this);
+    }
+
+    @Override
+    public void onBeaconFound(final BeaconLocation beaconLocation) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                currentBeacons.add(beaconLocation);
+                FindFragment.beaconLocationsAdapter.notifyDataSetChanged();
+            }
+        });
+    }
+
+    @Override
+    public void onBeaconLost(BeaconLocation beaconLocation) {
+
     }
 }

@@ -3,6 +3,7 @@ package dpint.si.app;
 import java.util.List;
 
 import dpint.si.beaconandroid.BeaconLocation;
+import dpint.si.beaconandroid.Probe;
 
 interface BeaconService{
     void startProbe(String beaconType);
@@ -10,7 +11,7 @@ interface BeaconService{
     boolean isProbeRunning();
     List<BeaconLocation> getBeacons();
 
-    void startAdvertise(String beaconType);
+    void startAdvertise(String beaconType, int port);
     void stopAdvertise(String beaconType);
-    List<String> getRunningAdvertisements();
+    List<Probe> getRunningAdvertisements();
 }

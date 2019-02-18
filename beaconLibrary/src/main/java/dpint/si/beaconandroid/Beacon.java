@@ -63,18 +63,32 @@ public class Beacon {
                 DatagramPacket recv = new DatagramPacket(buffer, buffer.length);
                 try {
                     socket.receive(recv);
-//                    Log.d("message", decode(recv.getData()));
                 } catch (IOException e) {
                     if(!socket.isClosed()){
                         socket.close();
                     }
                     isClosed.set(true);
                 }
+
+                byte[] message = encode(beaconType);
+                if (hasPrefix(message, recv.getData(), recv.getLength())) {
+                    DatagramPacket packet = new DatagramPacket(message, message.length,
+                            recv.getAddress(), recv.getPort());
+                    try {
+                        socket.send(packet);
+                    } catch (IOException e) {
+                        if(!socket.isClosed()){
+                            socket.close();
+                        }
+                        isClosed.set(true);
+                        break;
+                    }
+                }
             }
         }
     }
 
-    private static boolean hasPrefix(byte[] prefix, byte[] message, int messageLength){
+    static boolean hasPrefix(byte[] prefix, byte[] message, int messageLength){
         if(messageLength >= prefix.length){
             for(int i = 0; i < messageLength; i++){
                 if(prefix[i] != message[i]){
