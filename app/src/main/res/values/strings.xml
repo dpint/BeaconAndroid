@@ -2,14 +2,20 @@
     <string name="app_name">BeaconAndroid</string>
     <string name="advertise">Advertise</string>
     <string name="find">Find</string>
+    <string name="empty"> </string>
     <string name="beacon_type">Beacon type</string>
     <string name="stop">Stop</string>
     <string name="empty_beacon_type">Beacon type field can\'t be empty.</string>
     <string name="beacon_created">New beacon is created.</string>
+    <string name="beacon_stopped">Beacon stopped.</string>
+    <string name="beacon_exists">Beacon already exists.</string>
+    <string name="beacon_not_exist">Beacon does not exist.</string>
     <string name="advertised_port">Advertised port</string>
     <string name="beacon_found">Beacon found</string>
     <string name="empty_fields">Beacon type and advertised port fields must not be empty.</string>
     <string name="port_not_number">Advertised port must contain only numbers.</string>
     <string name="port_invalid_number">Advertised port must be between 0 and 65535.</string>
     <string name="beacon_creation_fail">There was an error during beacon creation.</string>
+    <string name="probe_started">Probe started.</string>
+    <string name="probe_stopped">Probe stopped.</string>
 </resources>

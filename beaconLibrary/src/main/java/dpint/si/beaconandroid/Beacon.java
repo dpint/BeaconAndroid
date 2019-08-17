@@ -1,25 +1,13 @@
 package dpint.si.beaconandroid;
 
 import android.content.Context;
-import android.provider.ContactsContract;
-import android.util.Log;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.MulticastSocket;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
-import java.nio.channels.DatagramChannel;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.IntStream;
 
 public class Beacon {
     final static int DISCOVERY_PORT = 35891;
@@ -49,6 +37,14 @@ public class Beacon {
         probeReceiver.start();
     }
 
+    public String getBeaconType() {
+        return beaconType;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
     public void close(){
         if(!isClosed.getAndSet(true)){
             socket.close();
@@ -68,6 +64,7 @@ public class Beacon {
                         socket.close();
                     }
                     isClosed.set(true);
+                    break;
                 }
 
                 byte[] message = encode(beaconType);

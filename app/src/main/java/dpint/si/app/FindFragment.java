@@ -1,7 +1,6 @@
 package dpint.si.app;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -37,25 +36,46 @@ public class FindFragment extends Fragment {
         layoutManager = new LinearLayoutManager(getActivity());
         beaconListRecyclerView.setLayoutManager(layoutManager);
         beaconListRecyclerView.setHasFixedSize(true);
-        beaconLocationsAdapter = new BeaconLocationsAdapter(MainActivity.currentBeacons);
+        beaconLocationsAdapter = new BeaconLocationsAdapter(MainActivity.foundBeacons);
         beaconListRecyclerView.setAdapter(beaconLocationsAdapter);
+
+        if(((MainActivity)getActivity()).isProbeRunning()) {
+            findButton.setText(R.string.stop);
+            beaconTypeEditText.setEnabled(false);
+            beaconTypeEditText.setText(((MainActivity)getActivity()).getRunningProbe()
+                    .getBeaconType());
+        }
 
         findButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String beaconType = beaconTypeEditText.getText().toString();
-                if(beaconType.equals("")){
-                    Toast.makeText(getActivity(), getString(R.string.empty_beacon_type),
-                            Toast.LENGTH_LONG).show();
-                }else if(findButton.getText().toString().equals(getString(R.string.find))){
-                    findButton.setText(R.string.stop);
-                    beaconTypeEditText.setEnabled(false);
-                    ((MainActivity)getActivity()).startProbe(beaconTypeEditText.getText().toString());
-                }else{
+
+                if(findButton.getText().toString().equals(getString(R.string.stop))) {
                     findButton.setText(R.string.find);
                     beaconTypeEditText.setEnabled(true);
+                    beaconTypeEditText.setText(R.string.empty);
+                    ((MainActivity)getActivity()).stopProbe(beaconType);
+                    Toast.makeText(getActivity(), getString(R.string.probe_stopped), Toast.LENGTH_LONG).show();
+                }else{
+                    if(checkInput(beaconType)) {
+                        findButton.setText(R.string.stop);
+                        beaconTypeEditText.setEnabled(false);
+                        ((MainActivity)getActivity()).startProbe(beaconType);
+                        Toast.makeText(getActivity(), getString(R.string.probe_started), Toast.LENGTH_LONG).show();
+                    }
                 }
             }
         });
+    }
+
+    private boolean checkInput(String beaconType) {
+        if(beaconType.equals("")){
+            Toast.makeText(getActivity(), getString(R.string.empty_beacon_type),
+                    Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        return true;
     }
 }

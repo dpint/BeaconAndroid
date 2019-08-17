@@ -23,8 +23,9 @@ public class MainActivity extends AppCompatActivity implements BeaconService, Pr
     Fragment findFragment;
     Fragment advertiseFragment;
 
-    public static List<BeaconLocation> currentBeacons = new ArrayList<>();
-    private List<Probe> runningAdvertisements = new ArrayList<>();
+    private Probe runningProbe;
+    public static List<BeaconLocation> foundBeacons = new ArrayList<>();
+    private List<Beacon> runningAdvertisements = new ArrayList<>();
 
     private Handler mHandler;
 
@@ -75,45 +76,60 @@ public class MainActivity extends AppCompatActivity implements BeaconService, Pr
     @Override
     public void startProbe(String beaconType) {
         try {
-            Probe p = new Probe(MainActivity.this.getApplicationContext(), beaconType);
-            runningAdvertisements.add(p);
-            registerListener(p);
+            runningProbe = new Probe(MainActivity.this.getApplicationContext(), beaconType);
+            registerListener(runningProbe);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public void stopProbe() {
-
+    public void stopProbe(String beaconType) {
+        runningProbe.close();
+        runningProbe = null;
     }
 
     @Override
     public boolean isProbeRunning() {
-        return false;
+        return runningProbe != null;
     }
 
     @Override
-    public List<BeaconLocation> getBeacons() {
-        return currentBeacons;
+    public Probe getRunningProbe() {
+        return runningProbe;
+    }
+
+    @Override
+    public List<BeaconLocation> getFoundBeacons() {
+        return foundBeacons;
     }
 
     @Override
     public void startAdvertise(String beaconType, int port) {
         try {
-            new Beacon(MainActivity.this.getApplicationContext(), beaconType, port);
+            Beacon b = new Beacon(MainActivity.this.getApplicationContext(), beaconType, port);
+            runningAdvertisements.add(b);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public void stopAdvertise(String beaconType) {
-
+    public void stopAdvertise(String beaconType, int port) {
+        Beacon b = getRunningAdvertisement(beaconType, port);
+        if(b != null) {
+            b.close();
+            runningAdvertisements.remove(b);
+        }
     }
 
     @Override
-    public List<Probe> getRunningAdvertisements() {
+    public boolean isAdvertisementRunning(String beaconType, int port) {
+        return getRunningAdvertisement(beaconType, port) != null;
+    }
+
+    @Override
+    public List<Beacon> getRunningAdvertisements() {
         return runningAdvertisements;
     }
 
@@ -121,12 +137,22 @@ public class MainActivity extends AppCompatActivity implements BeaconService, Pr
         p.registerProbeListener(this);
     }
 
+    public Beacon getRunningAdvertisement(String beaconType, int port) {
+        for(Beacon b : runningAdvertisements) {
+            if(b.getBeaconType().equals(beaconType) && b.getPort() == port) {
+                return b;
+            }
+        }
+
+        return null;
+    }
+
     @Override
     public void onBeaconFound(final BeaconLocation beaconLocation) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                currentBeacons.add(beaconLocation);
+                foundBeacons.add(beaconLocation);
                 FindFragment.beaconLocationsAdapter.notifyDataSetChanged();
             }
         });

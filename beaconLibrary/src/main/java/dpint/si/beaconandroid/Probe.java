@@ -47,6 +47,10 @@ public class Probe {
         probeReceiver.start();
     }
 
+    public String getBeaconType() {
+        return beaconType;
+    }
+
     public void registerProbeListener(ProbeListener probeListener) {
         this.probeListener = probeListener;
     }
